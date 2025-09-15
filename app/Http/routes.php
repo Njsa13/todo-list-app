@@ -18,14 +18,12 @@ Route::get('auth/logout', 'Auth\AuthController@getLogout');
 Route::get('auth/register', 'Auth\AuthController@getRegister');
 Route::post('auth/register', 'Auth\AuthController@postRegister');
 
+Route::get('me', 'UserController@getMe');
+
 Route::get('/', 'TaskController@index');
 
 Route::post('task', 'TaskController@store');
-
 Route::get('tasks', 'TaskController@getTasks');
-
 Route::patch('task/{id}', 'TaskController@update');
-
 Route::patch('task/change-status/{id}', 'TaskController@changeStatus');
-
 Route::delete('task/{id}', 'TaskController@destroy');
