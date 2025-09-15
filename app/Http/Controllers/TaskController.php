@@ -9,10 +9,17 @@ use App\Http\Controllers\Controller;
 use App\Task;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Auth;
 use Yajra\Datatables\Facades\Datatables;
 
 class TaskController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -46,8 +53,11 @@ class TaskController extends Controller
                 'title' => 'required|min:3'
             ]);
 
+            $userId = Auth::id();
+
             Task::create([
-                'title' => $request->title
+                'title' => $request->title,
+                'user_id' => $userId
             ]);
 
             return response()->json([
@@ -68,7 +78,9 @@ class TaskController extends Controller
     public function getTasks()
     {
         try {
-            $task = Task::select(['id', 'created_at', 'title', 'is_done']);
+            $userId = Auth::id();
+            $task = Task::select(['id', 'created_at', 'title', 'is_done'])
+                ->where('user_id', $userId);
             return Datatables::of($task)->make(true);
         } catch (Exception $e) {
             return response()->json([
@@ -118,7 +130,10 @@ class TaskController extends Controller
                     'error' => 'Id required'
                 ], 400);
 
-            $task = Task::findOrFail($id);
+            $userId = Auth::id();
+            $task = Task::where('id', $id)
+                ->where('user_id', $userId)
+                ->firstOrFail();
             $task->title = $request->title;
             $task->save();
 
@@ -149,7 +164,10 @@ class TaskController extends Controller
                     'error' => 'id required'
                 ], 400);
 
-            $task = Task::findOrFail($id);
+            $userId = Auth::id();
+            $task = Task::where('id', $id)
+                ->where('user_id', $userId)
+                ->firstOrFail();
             $task->is_done = !$task->is_done;
             $task->save();
 
@@ -181,7 +199,11 @@ class TaskController extends Controller
                 return response()->json([
                     'error' => 'Id required'
                 ], 400);
-            Task::findOrFail($id)->delete();
+            $userId = Auth::id();
+            Task::where('id', $id)
+                ->where('user_id', $userId)
+                ->firstOrFail()
+                ->delete();
 
             return response()->json([
                 'message' => 'Task successfully deleted'

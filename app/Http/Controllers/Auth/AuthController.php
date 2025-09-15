@@ -7,6 +7,8 @@ use Validator;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 use Illuminate\Foundation\Auth\AuthenticatesAndRegistersUsers;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -22,6 +24,8 @@ class AuthController extends Controller
     */
 
     use AuthenticatesAndRegistersUsers, ThrottlesLogins;
+
+    protected $redirectTo = '/';
 
     /**
      * Create a new authentication controller instance.
@@ -61,5 +65,47 @@ class AuthController extends Controller
             'email' => $data['email'],
             'password' => bcrypt($data['password']),
         ]);
+    }
+
+    public function postLogin(Request $request)
+    {
+        $this->validate($request, [
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        $credentials = $request->only('email', 'password');
+
+        if (!User::where('email', $request->email)->first())
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['error' => 'User not found'], 404);
+            }
+
+        if (Auth::attempt($credentials, $request->has('remember'))) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['message' => 'Login success'], 200);
+            }
+
+            return redirect()->intended($this->redirectPath());
+        }
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['error' => 'Invalid credentials'], 401);
+        }
+
+        return redirect($this->loginPath())
+            ->withInput($request->only('email', 'remember'))
+            ->withErrors([
+                'email' => $this->getFailedLoginMessage(),
+            ]);
+    }
+
+    public function getLogout(Request $request)
+    {
+        Auth::logout();
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['message' => 'Logged out'], 200);
+        }
+        return redirect('/auth/login');
     }
 }
