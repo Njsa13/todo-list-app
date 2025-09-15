@@ -64,6 +64,14 @@
         .content {
             margin-bottom: 30px
         }
+
+        .navbar-right {
+            padding: 15px;
+        }
+
+        .logout-btn {
+            margin: 0;
+        }
     </style>
 
     <title>Todo List App</title>
@@ -76,6 +84,9 @@
                 <a class="navbar-brand">
                     <span class="glyphicon glyphicon-th-large"></span> ToDo List
                 </a>
+            </div>
+            <div class="navbar-right">
+                <button id="logout-button" class="logout-btn btn btn-danger">Logout</button>
             </div>
         </div>
     </nav>
@@ -256,13 +267,26 @@
                         tasksTable.ajax.reload(null, false);
                     },
                     error: function(xhr) {
-                        console.log("Req error: ", xhr.responseJSON);
-                        iziToast.error({
-                            title: 'Error ' + xhr.status,
-                            message: xhr.status == 500 ? 'Data failed to save' : xhr
-                                .responseJSON.error,
-                            position: 'topCenter'
-                        });
+                        if (xhr.status === 422) {
+                            let errors = xhr.responseJSON;
+
+                            $.each(errors, function(key, messages) {
+                                messages.forEach(function(message) {
+                                    iziToast.error({
+                                        title: 'Validation Error',
+                                        message: message,
+                                        position: 'topCenter'
+                                    });
+                                });
+                            });
+                        } else {
+                            iziToast.error({
+                                title: 'Error ' + xhr.status,
+                                message: xhr.status == 500 ? 'Data failed to save' : xhr
+                                    .responseJSON.error,
+                                position: 'topCenter'
+                            });
+                        }
                     }
                 });
                 $('#submit-task').prop('disabled', false);
@@ -300,13 +324,27 @@
                         tasksTable.ajax.reload(null, false);
                     },
                     error: function(xhr) {
-                        console.log("Req error: ", xhr.responseJSON);
-                        iziToast.error({
-                            title: 'Error ' + xhr.status,
-                            message: xhr.status == 500 ? 'Data failed to update' : xhr
-                                .responseJSON.error,
-                            position: 'topCenter'
-                        });
+                        if (xhr.status === 422) {
+                            let errors = xhr.responseJSON;
+
+                            $.each(errors, function(key, messages) {
+                                messages.forEach(function(message) {
+                                    iziToast.error({
+                                        title: 'Validation Error',
+                                        message: message,
+                                        position: 'topCenter'
+                                    });
+                                });
+                            });
+                        } else {
+                            iziToast.error({
+                                title: 'Error ' + xhr.status,
+                                message: xhr.status == 500 ? 'Data failed to update' :
+                                    xhr
+                                    .responseJSON.error,
+                                position: 'topCenter'
+                            });
+                        }
                     }
                 });
                 $('#edit-submit-task').prop('disabled', false);
@@ -329,7 +367,6 @@
                         tasksTable.ajax.reload(null, false);
                     },
                     error: function(xhr) {
-                        console.log("Req error: ", xhr.responseJSON);
                         iziToast.error({
                             title: 'Error ' + xhr.status,
                             message: xhr.status == 500 ? 'Data failed to delete' : xhr
@@ -367,6 +404,28 @@
                 });
                 $(this).prop('disabled', false);
             });
+
+            $('#logout-button').click(function() {
+                $(this).prop('disabled', true);
+                $.ajax({
+                    url: '{{ url('auth/logout') }}',
+                    type: 'GET',
+                    success: function(res) {
+                        location.reload();
+                    },
+                    error: function(xhr) {
+                        console.log("Req error: ", xhr.responseJSON);
+                        iziToast.error({
+                            title: 'Error ' + xhr.status,
+                            message: xhr.status == 500 ?
+                                'Status sata failed to change' : xhr.responseJSON.error,
+                            position: 'topCenter'
+                        });
+                    }
+                });
+                $(this).prop('disabled', false);
+            });
+
         });
     </script>
 </body>

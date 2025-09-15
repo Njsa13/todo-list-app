@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css"
@@ -23,6 +24,12 @@
             text-align: center;
             margin-bottom: 20px;
         }
+
+        .create-new-account {
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 0;
+        }
     </style>
     <title>Login</title>
 </head>
@@ -35,16 +42,17 @@
                 <form id="login-form">
                     <div class="form-group">
                         <label for="email-input">Email</label>
-                        <input type="text" class="form-control" id="email-input" autocomplete="off"
-                            placeholder="Type your taks here">
+                        <input type="email" class="form-control" id="email-input" autocomplete="off"
+                            placeholder="Type your email here">
                     </div>
                     <div class="form-group">
                         <label for="password-input">Password</label>
                         <input type="password" class="form-control" id="password-input" autocomplete="off"
-                            placeholder="Type your taks here">
+                            placeholder="Type your password here">
                     </div>
                     <button id="submit-login" type="submit" class="btn btn-default">Login</button>
                 </form>
+                <p class="create-new-account">Login now or <a href="/auth/register">create new account</a></p>
             </div>
         </div>
     </div>
@@ -54,6 +62,57 @@
         integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous">
     </script>
     <script src="https://cdn.jsdelivr.net/npm/izitoast/dist/js/iziToast.min.js"></script>
+    <script>
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+
+        $('#login-form').submit(function(e) {
+            $('#submit-login').prop('disabled', true);
+            e.preventDefault();
+            $.ajax({
+                url: '{{ url('auth/login') }}',
+                type: 'POST',
+                data: {
+                    email: $('#email-input').val(),
+                    password: $('#password-input').val(),
+                },
+                headers: {
+                    'Accept': 'application/json'
+                },
+                success: function(res) {
+                    location.reload();
+                },
+                error: function(xhr) {
+                    if (xhr.status === 422) {
+                        let errors = xhr.responseJSON;
+
+                        $.each(errors, function(key, messages) {
+                            messages.forEach(function(message) {
+                                iziToast.error({
+                                    title: 'Validation Error',
+                                    message: message,
+                                    position: 'topCenter'
+                                });
+                            });
+                        });
+                    } else {
+                        iziToast.error({
+                            title: 'Error ' + xhr.status,
+                            message: xhr.status == 500 ? 'Failed to login :' : xhr
+                                .responseJSON.error,
+                            position: 'topCenter'
+                        });
+                    }
+                }
+            });
+            $('#submit-login').prop('disabled', false);
+            $('#email-input').val('');
+            $('#password-input').val('');
+        });
+    </script>
 </body>
 
 </html>

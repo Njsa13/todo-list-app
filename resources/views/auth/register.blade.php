@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css"
@@ -23,6 +24,12 @@
             text-align: center;
             margin-bottom: 20px;
         }
+
+        .back-to-login {
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 0;
+        }
     </style>
     <title>Register</title>
 </head>
@@ -36,20 +43,26 @@
                     <div class="form-group">
                         <label for="name-input">Name</label>
                         <input type="text" class="form-control" id="name-input" autocomplete="off"
-                            placeholder="Type your taks here">
+                            placeholder="Type your name here">
                     </div>
                     <div class="form-group">
                         <label for="email-input">Email</label>
-                        <input type="text" class="form-control" id="email-input" autocomplete="off"
-                            placeholder="Type your taks here">
+                        <input type="email" class="form-control" id="email-input" autocomplete="off"
+                            placeholder="Type your email here">
                     </div>
                     <div class="form-group">
                         <label for="password-input">Password</label>
                         <input type="password" class="form-control" id="password-input" autocomplete="off"
-                            placeholder="Type your taks here">
+                            placeholder="Type your password here">
+                    </div>
+                    <div class="form-group">
+                        <label for="password-input">Confirm Password</label>
+                        <input type="password" class="form-control" id="password-confirmation" autocomplete="off"
+                            placeholder="Confirm your password here">
                     </div>
                     <button id="submit-register" type="submit" class="btn btn-default">Create New Account</button>
                 </form>
+                <p class="back-to-login">Create new account or <a href="/auth/login">login now</a></p>
             </div>
         </div>
     </div>
@@ -60,8 +73,14 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/izitoast/dist/js/iziToast.min.js"></script>
     <script>
-        $('#submit-register').submit(function() {
-            $('#submit-task').prop('disabled', true);
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+
+        $('#register-form').submit(function(e) {
+            $('#submit-register').prop('disabled', true);
             e.preventDefault();
             $.ajax({
                 url: '{{ url('auth/register') }}',
@@ -70,30 +89,40 @@
                     name: $('#name-input').val(),
                     email: $('#email-input').val(),
                     password: $('#password-input').val(),
+                    password_confirmation: $('#password-confirmation').val()
                 },
                 success: function(res) {
-                    iziToast.success({
-                        title: 'Success',
-                        message: 'Successfully registered',
-                        position: 'topCenter'
-                    });
-                    tasksTable.ajax.reload(null, false);
+                    location.reload();
                 },
                 error: function(xhr) {
-                    console.log("Req error: ", xhr.responseJSON);
-                    iziToast.error({
-                        title: 'Error ' + xhr.status,
-                        message: xhr.status == 500 ? 'Failed to register : xhr.responseJSON
-                            .error,
-                        position: 'topCenter'
-                    });
+                    if (xhr.status === 422) {
+                        let errors = xhr.responseJSON;
+
+                        $.each(errors, function(key, messages) {
+                            messages.forEach(function(message) {
+                                iziToast.error({
+                                    title: 'Validation Error',
+                                    message: message,
+                                    position: 'topCenter'
+                                });
+                            });
+                        });
+                    } else {
+                        iziToast.error({
+                            title: 'Error ' + xhr.status,
+                            message: xhr.status == 500 ? 'Failed to register :' : xhr
+                                .responseJSON.error,
+                            position: 'topCenter'
+                        });
+                    }
                 }
             });
-            $('#submit-task').prop('disabled', false);
+            $('#submit-register').prop('disabled', false);
             $('#name-input').val('');
             $('#email-input').val('');
             $('#password-input').val('');
-        })
+            $('#password-confirmation').val('');
+        });
     </script>
 </body>
 
