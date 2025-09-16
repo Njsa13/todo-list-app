@@ -1,27 +1,72 @@
-## Laravel PHP Framework
+# Todo List Application - Laravel 5.1
 
-[![Build Status](https://travis-ci.org/laravel/framework.svg)](https://travis-ci.org/laravel/framework)
-[![Total Downloads](https://poser.pugx.org/laravel/framework/d/total.svg)](https://packagist.org/packages/laravel/framework)
-[![Latest Stable Version](https://poser.pugx.org/laravel/framework/v/stable.svg)](https://packagist.org/packages/laravel/framework)
-[![Latest Unstable Version](https://poser.pugx.org/laravel/framework/v/unstable.svg)](https://packagist.org/packages/laravel/framework)
-[![License](https://poser.pugx.org/laravel/framework/license.svg)](https://packagist.org/packages/laravel/framework)
+A simple Todo List application built with **Laravel 5.1**.  
+This project allows users to manage their daily tasks by adding, editing, marking as completed, and deleting tasks.  
+It is designed as a learning project for understanding Laravel 5.1 fundamentals.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable, creative experience to be truly fulfilling. Laravel attempts to take the pain out of development by easing common tasks used in the majority of web projects, such as authentication, routing, sessions, queueing, and caching.
+---
 
-Laravel is accessible, yet powerful, providing powerful tools needed for large, robust applications. A superb inversion of control container, expressive migration system, and tightly integrated unit testing support give you the tools you need to build any application with which you are tasked.
+## Requirements
 
-## Official Documentation
+Before running the project, make sure your environment meets the following requirements:
 
-Documentation for the framework can be found on the [Laravel website](http://laravel.com/docs).
+- PHP >= 5.5.9
+- Composer
+- Database: PostgreSQL
+- PHP Extensions: OpenSSL, PDO, Mbstring, Tokenizer
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](http://laravel.com/docs/contributions).
+## Installation
 
-## Security Vulnerabilities
+Follow these steps to set up the project locally:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell at taylor@laravel.com. All security vulnerabilities will be promptly addressed.
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/Njsa13/todo-list-app.git
+   cd todo-list-app
+   ```
+2. **Install dependencies using Composer**
+   ```bash
+   composer install
+   ```
+3. **Set up environment file**
+   ```bash
+   cp .env.example .env
+   ```
+4. **Generate application key**
+   ```bash
+   php artisan key:generate
+   ```
+5. **Run migrations**
+   ```bash
+   php artisan migrate
+   ```
+6. **Start the development server**
+   ```bash
+   php artisan serve
+   ```
 
-### License
+The application will be available at:
+http://localhost:8000
 
-The Laravel framework is open-sourced software licensed under the [MIT license](http://opensource.org/licenses/MIT)
+## Features
+
+- User authentication (register & login)
+- Create new tasks
+- Edit existing tasks
+- Mark tasks as completed or incomplete
+- Delete tasks
+- One-to-Many relationship between User and Task (each user has their own tasks)
+
+## Project Structure (Important Directories)
+
+- app/Http/Controllers → Application controllers (e.g., TaskController, AuthController)
+- app/Models → Eloquent models (Task, User)
+- resources/views → Blade templates for frontend UI
+- database/migrations → Migration files for creating database tables
+- routes/web.php → Application routes
+
+## License
+
+This project is open-sourced under the [MIT license](LICENSE).
