@@ -50,6 +50,8 @@ Follow these steps to set up the project locally:
 The application will be available at:
 http://localhost:8000
 
+---
+
 ## Features
 
 - User authentication (register & login)
@@ -59,6 +61,8 @@ http://localhost:8000
 - Delete tasks
 - One-to-Many relationship between User and Task (each user has their own tasks)
 
+---
+
 ## Project Structure (Important Directories)
 
 - app/Http/Controllers → Application controllers (e.g., TaskController, AuthController)
@@ -66,6 +70,8 @@ http://localhost:8000
 - resources/views → Blade templates for frontend UI
 - database/migrations → Migration files for creating database tables
 - routes/web.php → Application routes
+
+---
 
 ## License
 
